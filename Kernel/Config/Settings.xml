@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Config version="1.0">
+    <Setting Name="Email">John@mail.org</Setting>
+    <Setting Name="Password">pass123</Setting>
+    <Setting Name="URL">http://open.poersmart.com:8012/newUsers/123/123/nodes</Setting>
+    <Setting Name="Realm">Protected</Setting>
+    <Setting Name="Location">open.poersmart.com:8012</Setting>
+</Config>

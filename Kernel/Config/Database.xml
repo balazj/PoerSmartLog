@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Config version="1.0">
+    <Setting Name="DSN">DBI:mysql:database=PoerSmartLog;host=localhost;</Setting>
+    <Setting Name="USER">user</Setting>
+    <Setting Name="PW">pass</Setting>
+</Config>
