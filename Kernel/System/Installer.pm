@@ -48,6 +48,10 @@ sub Install {
 
     my @Tasks = (
         {
+            Module => 'PerlModules',
+            Message => 'Check if required perl modules are installed',
+        },
+        {
             Module => 'DB',
             Message => 'Database installation started.',
         },
@@ -66,16 +70,16 @@ sub Install {
         die if !$Loaded;
         
         my $ModuleObject = "Kernel::System::Installer::$Task->{Module}"->new();
-        my %Result = $ModuleObject->Run();
+        my $Result = $ModuleObject->Run();
 
-        if (!$Result{Success}) {
+        if (!$Result->{Success}) {
             print "\n\n    ERROR: Task $Task->{Module} - $Task->{Method} failed!";
-            print "\n        $Result{Message}\n\n";
+            print "\n        $Result->{Message}\n\n";
             die;
         }
 
-        if ($Result{Message}) {
-            print "\n    $Result{Message}";
+        if ($Result->{Message}) {
+            print "\n    $Result->{Message}";
         }
     }
 

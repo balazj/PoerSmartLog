@@ -42,9 +42,9 @@ sub new {
 sub Run {
     my ( $Self, %Param ) = @_;
 
-    my %Result = (
+    my $Result = {
         Success => 0,
-    );
+    };
 
     # Create needed objects.
     my $DBObject = Kernel::System::DB->new(
@@ -146,8 +146,8 @@ sub Run {
         }
     }
 
-    $Result{Success} = 1;
-    return %Result;
+    $Result->{Success} = 1;
+    return $Result;
 }
 
 
