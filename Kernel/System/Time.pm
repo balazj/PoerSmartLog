@@ -11,6 +11,7 @@ use strict;
 use warnings;
 
 use Time::Local;
+use Kernel::System::Log;
 
 =head1 NAME
 
@@ -47,6 +48,8 @@ sub new {
         || $Param{UserTimeZone}
         || 0;
     $Self->{TimeSecDiff} = $Self->{TimeZone} * 3600;    # 60 * 60
+
+    $Self->{LogObject} = Kernel::System::Log->new();
 
     return $Self;
 }
@@ -94,8 +97,10 @@ sub SystemTime2TimeStamp {
 
     # check needed stuff
     if ( !defined $Param{SystemTime} ) {
-        # TODO: Log.
-        print 'Need SystemTime!';
+        $Self->{LogObject}->Log(
+            Priority => 'error',
+            Message  => 'Need SystemTime!'
+        );
         return;
     }
 
@@ -144,8 +149,10 @@ sub SystemTime2Date {
 
     # check needed stuff
     if ( !defined $Param{SystemTime} ) {
-        # TODO: Log.
-        print 'Need SystemTime!';
+        $Self->{LogObject}->Log(
+            Priority => 'error',
+            Message  => 'Need SystemTime!'
+        );
         return;
     }
 
@@ -177,8 +184,10 @@ sub TimeStamp2SystemTime {
 
     # check needed stuff
     if ( !$Param{String} ) {
-        # TODO: Log.
-        print 'Need String!';
+        $Self->{LogObject}->Log(
+            Priority => 'error',
+            Message  => 'Need String!'
+        );
         return;
     }
 
@@ -286,8 +295,11 @@ sub TimeStamp2SystemTime {
 
     # return error
     if ( !defined $SystemTime ) {
-        # TODO: Log.
-        print "Invalid Date '$Param{String}'!";
+        $Self->{LogObject}->Log(
+            Priority => 'error',
+            Message  => "Invalid Date '$Param{String}'!"
+        );
+        return;
     }
 
     # return system time
@@ -316,8 +328,10 @@ sub Date2SystemTime {
     # check needed stuff
     for (qw(Year Month Day Hour Minute Second)) {
         if ( !defined $Param{$_} ) {
-            # TODO: Log.
-            print "Need $_!";
+            $Self->{LogObject}->Log(
+                Priority => 'error',
+                Message  => "Need $_!"
+            );
             return;
         }
     }
@@ -329,8 +343,10 @@ sub Date2SystemTime {
     };
 
     if ( !defined $SystemTime ) {
-        # TODO: Log.
-        print "Invalid Date '$Param{Year}-$Param{Month}-$Param{Day} $Param{Hour}:$Param{Minute}:$Param{Second}'!";
+        $Self->{LogObject}->Log(
+            Priority => 'error',
+            Message  => "Invalid Date '$Param{Year}-$Param{Month}-$Param{Day} $Param{Hour}:$Param{Minute}:$Param{Second}'!"
+        );
         return;
     }
 

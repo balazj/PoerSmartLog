@@ -63,10 +63,7 @@ sub Install {
             "Kernel/System/Installer/$Task->{Module}",
         );
 
-        if (!$Loaded) {
-            # TODO: Log.
-            die;
-        }
+        die if !$Loaded;
         
         my $ModuleObject = "Kernel::System::Installer::$Task->{Module}"->new();
         my %Result = $ModuleObject->Run();
@@ -74,7 +71,6 @@ sub Install {
         if (!$Result{Success}) {
             print "\n\n    ERROR: Task $Task->{Module} - $Task->{Method} failed!";
             print "\n        $Result{Message}\n\n";
-            # TODO: log.
             die;
         }
 

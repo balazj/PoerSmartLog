@@ -10,6 +10,7 @@ use strict;
 use warnings;
 
 use Kernel::System::Encode;
+use Kernel::System::Log;
 use Digest::MD5;
 
 sub new {
@@ -18,6 +19,8 @@ sub new {
     # Allocate new hash for object.
     my $Self = {%Param};
     bless( $Self, $Type );
+
+    $Self->{LogObject} = Kernel::System::Log->new();
 
     return $Self;
 }
@@ -38,8 +41,10 @@ sub XMLParse {
 
     # check needed stuff
     if ( !defined $Param{String} ) {
-        # TODO: Log.
-        print "Missing String.\n";
+        $Self->{LogObject}->Log(
+            Priority => 'error',
+            Message  => "Need String."
+        );
 
         return;
     }
@@ -102,7 +107,10 @@ sub XMLParse {
             $Self->{XMLQuote} = 0;
         }
         else {
-            # TODO Log error.
+            $Self->{LogObject}->Log(
+                Priority => 'error',
+                Message  =>  "XML::Parser was unable to parse string: $Param{String}!"
+            );
         }
     }
 

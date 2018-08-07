@@ -9,6 +9,8 @@ package Kernel::System::JSON;
 use strict;
 use warnings;
 
+use Kernel::System::Log;
+
 BEGIN {
     if ( $ENV{GATEWAY_INTERFACE} && $ENV{GATEWAY_INTERFACE} =~ m{\A CGI-PerlEx}xmsi ) {
         $ENV{PERL_JSON_BACKEND} = 'JSON::PP';    ## no critic
@@ -42,6 +44,8 @@ sub new {
     my $Self = {};
     bless( $Self, $Type );
 
+    $Self->{LogObject} = Kernel::System::Log->new();
+
     return $Self;
 }
 
@@ -63,9 +67,10 @@ sub Encode {
     # check for needed data
     if ( !defined $Param{Data} ) {
 
-        # TODO: Log.
-
-        print 'Need Data!';
+        $Self->{LogObject}->Log(
+            Priority => 'error',
+            Message  => 'Need Data!'
+        );
         return;
     }
 
@@ -128,8 +133,10 @@ sub Decode {
     # use eval here, as JSON::XS->decode() dies when providing a malformed JSON string
     if ( !eval { $Scalar = $JSONObject->decode( $Param{Data} ) } ) {
 
-        # TODO: Log.
-        print 'Decoding the JSON string failed: ' . $@;
+        $Self->{LogObject}->Log(
+            Priority => 'error',
+            Message  => 'Decoding the JSON string failed: ' . $@,
+        );
         return;
     }
 

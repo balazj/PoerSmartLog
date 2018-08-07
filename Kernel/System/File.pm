@@ -9,6 +9,8 @@ package Kernel::System::File;
 use strict;
 use warnings;
 
+use Kernel::System::Log;
+
 use Fcntl qw(:flock);
 
 =head1 NAME
@@ -35,6 +37,8 @@ sub new {
     # allocate new hash for object
     my $Self = {};
     bless( $Self, $Type );
+
+    $Self->{LogObject} = Kernel::System::Log->new();
 
     return $Self;
 }
@@ -73,23 +77,29 @@ sub FileRead {
 
         # Check if file exists only if system was not able to open it (to get better error message).
         if ( !-e $Param{Location} ) {
-            print "$Param{Location} doesn't exists.\n";
-
-            # TODO: Log.
+            $Self->{LogObject}->Log(
+                Priority => 'error',
+                Message  => "$Param{Location} doesn't exists.",
+            );
+            return;
         }
         else {
-            print "Unable to open $Param{Location}.\n";
-
-            # TODO: Log.
+            $Self->{LogObject}->Log(
+                Priority => 'error',
+                Message  => "Unable to open $Param{Location}.",
+            );
+            return;
         }
         return;
     }
 
     # lock file (Shared Lock)
     if ( !flock $FH, LOCK_SH ) {
-        print "Unable to lock $Param{Location}.\n";
-
-        # TODO: Log.
+        $Self->{LogObject}->Log(
+            Priority => 'error',
+            Message  => "Unable to lock $Param{Location}."
+        );
+        return;
     }
 
     # enable binmode

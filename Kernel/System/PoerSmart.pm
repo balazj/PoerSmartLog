@@ -9,10 +9,11 @@ package Kernel::System::PoerSmart;
 use strict;
 use warnings;
 
-use Kernel::System::XML;
-use Kernel::System::File;
-use Kernel::System::WebUserAgent;
 use Kernel::System::DB;
+use Kernel::System::File;
+use Kernel::System::Time;
+use Kernel::System::WebUserAgent;
+use Kernel::System::XML;
 
 sub new {
     my ( $Type, %Param ) = @_;
@@ -20,6 +21,8 @@ sub new {
     # Allocate new hash for object.
     my $Self = {%Param};
     bless( $Self, $Type );
+
+    $Self->{LogObject} = Kernel::System::Log->new();
 
     return $Self;
 }
@@ -121,8 +124,10 @@ sub ParametersGet {
     if ($Response{Status} ne '200 OK') {
 
         # Something went wrong.
-        # TODO: Log.
-        print $Response{Status};
+        $Self->{LogObject}->Log(
+            Priority => 'error',
+            Message  => $Response{Status}
+        );
         return;
     }
 
@@ -157,8 +162,10 @@ sub LogAdd {
     # Check needed stuff.
     for my $Needed (qw(Data)) {
         if ( !$Param{$Needed} ) {
-            # TODO: Log.
-            print "Needed $Needed!\n";
+            $Self->{LogObject}->Log(
+                Priority => 'error',
+                Message  => "Needed $Needed!\n"
+            );
             return;
         }
     }
@@ -244,8 +251,10 @@ sub _StringClean {
 
     if ( !$Param{StringRef} || ref $Param{StringRef} ne 'SCALAR' ) {
 
-        # TODO: Log.
-        print 'Need a scalar reference!';
+        $Self->{LogObject}->Log(
+            Priority => 'error',
+            Message  => 'Need a scalar reference!',
+        );
         return;
     }
 
@@ -254,8 +263,10 @@ sub _StringClean {
 
     # check for invalid utf8 characters and remove invalid strings
     if ( !utf8::valid( ${ $Param{StringRef} } ) ) {
-        # TODO: Log.
-        print "Removed string containing invalid utf8: '${ $Param{StringRef} }'!";
+        $Self->{LogObject}->Log(
+            Priority => 'error',
+            Message  => "Removed string containing invalid utf8: '${ $Param{StringRef} }'!"
+        );
 
         ${ $Param{StringRef} } = '';
         return;
