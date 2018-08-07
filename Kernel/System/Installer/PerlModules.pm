@@ -55,7 +55,7 @@ sub new {
         #   e.g. cpan DBD::Oracle
         aptget => {
             CMD       => 'apt-get install -y %s',
-            UseModule => 1,
+            UseModule => 0,
         },
         emerge => {
             CMD       => 'emerge %s',
