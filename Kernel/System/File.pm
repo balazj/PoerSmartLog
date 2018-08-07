@@ -139,7 +139,7 @@ sub Require {
     my ( $Self, $Module, %Param ) = @_;
 
     if ( !$Module ) {
-        $Kernel::OM->Get('Kernel::System::Log')->Log(
+        $Self->{LogObject}->Log(
             Priority => 'error',
             Message  => 'Need module!',
         );
@@ -156,7 +156,7 @@ sub Require {
 
         if ( !$Param{Silent} ) {
             my $Message = $@;
-            $Kernel::OM->Get('Kernel::System::Log')->Log(
+            $Self->{LogObject}->Log(
                 Caller   => 1,
                 Priority => 'error',
                 Message  => $Message,
