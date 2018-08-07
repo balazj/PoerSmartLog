@@ -8,6 +8,7 @@
 
 use strict;
 use warnings;
+use Term::ANSIColor;
 
 # use ../../ as lib location
 use FindBin qw($Bin);

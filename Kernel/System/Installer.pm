@@ -42,7 +42,7 @@ sub new {
 sub Install {
     my ( $Self, %Param ) = @_;
 
-    print "\nInstallation started.";
+    Print("\nInstallation started.");
 
     my $FileObject = Kernel::System::File->new();
 
@@ -60,7 +60,7 @@ sub Install {
     TASK:
     for my $Task (@Tasks) {
 
-        print "\n    $Task->{Message}";
+        Print("\n    $Task->{Message}");
 
         # Create object.
         my $Loaded = $FileObject->Require(
@@ -73,17 +73,41 @@ sub Install {
         my $Result = $ModuleObject->Run();
 
         if (!$Result->{Success}) {
-            print "\n\n    ERROR: Task $Task->{Module} - $Task->{Method} failed!";
-            print "\n        $Result->{Message}\n\n";
+            Print("\n\n    ERROR: Task $Task->{Module} - $Task->{Method} failed!");
+            Print("\n        $Result->{Message}\n\n");
             die;
         }
 
         if ($Result->{Message}) {
-            print "\n    $Result->{Message}";
+            Print("\n    $Result->{Message}");
         }
     }
 
-    print "\nInstallation finished.\n";
+    Print("\nInstallation finished.\n");
+}
+
+sub Print {
+    my ($Text) = @_;
+
+    print _ReplaceColorTags($Text);
+
+    return;
+}
+
+sub _ReplaceColorTags {
+    my ($Text) = @_;
+
+    $Text //= '';
+
+    $Text =~ s{<(green|yellow|red)>(.*?)</\1>}{_Color($1, $2)}gsmxe;
+
+    return $Text;
+}
+
+sub _Color {
+    my ( $Color, $Text ) = @_;
+
+    return Term::ANSIColor::color($Color) . $Text . Term::ANSIColor::color('reset');
 }
 
 
