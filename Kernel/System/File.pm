@@ -114,6 +114,51 @@ sub FileRead {
     return \$String;
 }
 
+=head2 Require()
+
+Require/load a module.
+
+    my $Loaded = $FileObject->Require(
+        'Kernel::System::Example',
+        Silent => 1,                # optional, no log entry if module was not found
+    );
+
+=cut
+
+sub Require {
+    my ( $Self, $Module, %Param ) = @_;
+
+    if ( !$Module ) {
+        $Kernel::OM->Get('Kernel::System::Log')->Log(
+            Priority => 'error',
+            Message  => 'Need module!',
+        );
+        return;
+    }
+
+    eval {
+        my $FileName = $Module =~ s{::}{/}smxgr;
+        require $FileName . '.pm';
+    };
+
+    # Handle errors.
+    if ($@) {
+
+        if ( !$Param{Silent} ) {
+            my $Message = $@;
+            $Kernel::OM->Get('Kernel::System::Log')->Log(
+                Caller   => 1,
+                Priority => 'error',
+                Message  => $Message,
+            );
+        }
+
+        return;
+    }
+
+    return 1;
+}
+
 1;
 
 =head1 TERMS AND CONDITIONS
