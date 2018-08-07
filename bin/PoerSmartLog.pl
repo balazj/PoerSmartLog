@@ -33,9 +33,9 @@ for my $Item (@Result) {
     );
 
     if (!$Success) {
-        # $LogObject->Log(
-        #     Priority => 'error',
-        #     Message  => "System was unable to save log entry!",
-        # );
+        $LogObject->Log(
+            Priority => 'error',
+            Message  => "System was unable to save log entry!",
+        );
     }
 }
