@@ -15,6 +15,7 @@ use LWP::UserAgent;
 
 use Kernel::System::Encode;
 use Kernel::System::JSON;
+use Kernel::System::Log;
 
 =head1 NAME
 
@@ -42,6 +43,8 @@ sub new {
     # allocate new hash for object
     my $Self = {};
     bless( $Self, $Type );
+
+    $Self->{LogObject} = Kernel::System::Log->new();
 
     $Self->{Timeout} = 15;
 
@@ -167,8 +170,10 @@ sub Request {
         # check for Data param
         if ( $DataRef ne 'ARRAY' && $DataRef ne 'HASH' ) {
 
-            # TODO: Log.
-            print "WebUserAgent POST: Need Data param containing a hashref or arrayref with data.\n";
+            $Self->{LogObject}->Log(
+                Priority => 'error',
+                Message  => "WebUserAgent POST: Need Data param containing a hashref or arrayref with data."
+            );
             return ( Status => 0 );
         }
 
@@ -180,8 +185,10 @@ sub Request {
 
         if ( !$Param{NoLog} ) {
 
-            # TODO: Log.
-            print "Can't perform $Param{Type} on $Param{URL}: " . $Response->status_line();
+            $Self->{LogObject}->Log(
+                Priority => 'error',
+                Message  => "Can't perform $Param{Type} on $Param{URL}: " . $Response->status_line()
+            );
         }
 
         return (
@@ -209,11 +216,3 @@ sub Request {
 }
 
 1;
-
-=head1 TERMS AND CONDITIONS
-
-This software comes with ABSOLUTELY NO WARRANTY. For details, see
-the enclosed file COPYING for license information (AGPL). If you
-did not receive this file, see L<http://www.gnu.org/licenses/agpl.txt>.
-
-=cut

@@ -14,8 +14,10 @@ use List::Util();
 
 use Kernel::System::Encode;
 use Kernel::System::File;
+use Kernel::System::Log;
 use Kernel::System::Time;
 use Kernel::System::XML;
+
 =head1 NAME
 
 Kernel::System::DB - global database interface
@@ -53,8 +55,10 @@ sub new {
     # 0=off; 1=updates; 2=+selects; 3=+Connects;
     $Self->{Debug} = $Param{Debug} || 0;
 
-    my $XMLObject = Kernel::System::XML->new();
     my $FileObject = Kernel::System::File->new();
+    my $XMLObject = Kernel::System::XML->new();
+
+    $Self->{LogObject} = Kernel::System::Log->new();
 
     # Read file content.
     my $ContentSCALARRef = $FileObject->FileRead(
@@ -126,8 +130,10 @@ sub Connect {
 
     # debug
     if ( $Self->{Debug} > 2 ) {
-        # TODO: Log.
-        print "DB.pm->Connect: DSN: $Self->{DSN}, User: $Self->{USER}, Pw: $Self->{PW}, DB Type: $Self->{'DB::Type'};";
+        $Self->{LogObject}->Log(
+            Priority => 'notice',
+            Message  =>  "DB.pm->Connect: DSN: $Self->{DSN}, User: $Self->{USER}, Pw: $Self->{PW}, DB Type: $Self->{'DB::Type'};"
+        );
     }
 
     # db connect
@@ -139,9 +145,10 @@ sub Connect {
     );
 
     if ( !$Self->{dbh} ) {
-        # TODO: Log.
-
-        print $DBI::errstr;
+        $Self->{LogObject}->Log(
+            Priority => 'error',
+            Message  => $DBI::errstr,
+        );
         return;
     }
 
@@ -165,9 +172,10 @@ sub Disconnect {
 
     # debug
     if ( $Self->{Debug} > 2 ) {
-        # TODO: Log.
-
-        print 'DB.pm->Disconnect';
+        $Self->{LogObject}->Log(
+            Priority => 'notice',
+            Message  =>  'DB.pm->Disconnect'
+        );
     }
 
     # do disconnect
@@ -218,8 +226,10 @@ sub Do {
 
     # check needed stuff
     if ( !$Param{SQL} ) {
-        # TODO: Log.
-        print 'Need SQL!';
+        $Self->{LogObject}->Log(
+            Priority => 'error',
+            Message  =>  "Need SQL!"
+        );
         return;
     }
 
@@ -235,8 +245,10 @@ sub Do {
                 push @Array, $$Data;
             }
             else {
-                # TODO: Log.
-                print 'No SCALAR param in Bind!';
+                $Self->{LogObject}->Log(
+                    Priority => 'error',
+                    Message  =>  'No SCALAR param in Bind!'
+                );
                 return;
             }
         }
@@ -263,16 +275,20 @@ sub Do {
     if ( $Self->{Debug} > 0 ) {
         $Self->{DoCounter}++;
 
-        # TODO: Log.
-        print "DB.pm->Do ($Self->{DoCounter}) SQL: '$Param{SQL}'";
+        $Self->{LogObject}->Log(
+            Priority => 'notice',
+            Message  =>  "DB.pm->Do ($Self->{DoCounter}) SQL: '$Param{SQL}'"
+        );
     }
 
     return if !$Self->Connect();
 
     # send sql to database
     if ( !$Self->{dbh}->do( $Param{SQL}, undef, @Array ) ) {
-        # TODO: Log.
-        print "$DBI::errstr, SQL: '$Param{SQL}'";
+        $Self->{LogObject}->Log(
+            Priority => 'error',
+            Message  =>  "$DBI::errstr, SQL: '$Param{SQL}'"
+        );
         return;
     }
 
@@ -325,14 +341,19 @@ sub Prepare {
 
     # check needed stuff
     if ( !$Param{SQL} ) {
-        # TODO: Log.
-        print 'Need SQL!';
+        $Self->{LogObject}->Log(
+            Priority => 'error',
+            Message  => 'Need SQL!'
+        );
         return;
     }
 
     if ( $Param{Bind} && ref $Param{Bind} ne 'ARRAY' ) {
-        # TODO: Log.
-        print 'Bind must be and array reference!';
+        $Self->{LogObject}->Log(
+            Priority => 'error',
+            Message  =>  'Bind must be and array reference!'
+        );
+        return;
     }
 
     if ( defined $Param{Encode} ) {
@@ -365,8 +386,10 @@ sub Prepare {
     # debug
     if ( $Self->{Debug} > 1 ) {
         $Self->{PrepareCounter}++;
-        # TODO: Log.
-        print "DB.pm->Prepare ($Self->{PrepareCounter}/" . time() . ") SQL: '$SQL'";
+        $Self->{LogObject}->Log(
+            Priority => 'notice',
+            Message  =>  "DB.pm->Prepare ($Self->{PrepareCounter}/" . time() . ") SQL: '$SQL'"
+        );
     }
 
     # slow log feature
@@ -387,8 +410,10 @@ sub Prepare {
                 push @Array, $$Data;
             }
             else {
-                # TODO: Log.
-                print 'No SCALAR param in Bind!';
+                $Self->{LogObject}->Log(
+                    Priority => 'error',
+                    Message  => 'No SCALAR param in Bind!'
+                );
                 return;
             }
         }
@@ -401,14 +426,18 @@ sub Prepare {
 
     # do
     if ( !( $Self->{Cursor} = $Self->{dbh}->prepare($SQL) ) ) {
-        # TODO: Log.
-        print "$DBI::errstr, SQL: '$SQL'";
+        $Self->{LogObject}->Log(
+            Priority => 'error',
+            Message  =>  "$DBI::errstr, SQL: '$SQL'"
+        );
         return;
     }
 
     if ( !$Self->{Cursor}->execute(@Array) ) {
-        # TODO: Log.
-        print "$DBI::errstr, SQL: '$SQL'";
+        $Self->{LogObject}->Log(
+            Priority => 'error',
+            Message  =>  "$DBI::errstr, SQL: '$SQL'"
+        );
         return;
     }
 
@@ -416,8 +445,10 @@ sub Prepare {
     if ( $Self->{SlowLog} ) {
         my $LogTimeTaken = time() - $LogTime;
         if ( $LogTimeTaken > 4 ) {
-            # TODO: Log.
-            print "Slow ($LogTimeTaken s) SQL: '$SQL'";
+            $Self->{LogObject}->Log(
+                Priority => 'error',
+                Message  => "Slow ($LogTimeTaken s) SQL: '$SQL'"
+            );
         }
     }
 
@@ -506,8 +537,10 @@ sub Ping {
 
     # debug
     if ( $Self->{Debug} > 2 ) {
-        # TODO: Log.
-        print 'DB.pm->Ping';
+        $Self->{LogObject}->Log(
+            Priority => 'notice',
+            Message  => 'DB.pm->Ping'
+        );
     }
 
     if ( !defined $Param{AutoConnect} || $Param{AutoConnect} ) {

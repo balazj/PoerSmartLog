@@ -13,11 +13,13 @@ use lib "$Bin/..";
 use lib "$Bin/../Kernel/cpan-lib";
 
 use Kernel::System::PoerSmart;
+use Kernel::System::Log;
 
 # 0=off;1=on;
 my $Debug = 0;
 
 my $PoerSmartObject = Kernel::System::PoerSmart->new();
+my $LogObject = Kernel::System::Log->new();
 
 # Get current heating parameters.
 my @Result = $PoerSmartObject->ParametersGet();
@@ -31,7 +33,9 @@ for my $Item (@Result) {
     );
 
     if (!$Success) {
-        # TODO: Log.
-        print "System was unable to save log entry!\n";
+        $LogObject->Log(
+            Priority => 'error',
+            Message  => "System was unable to save log entry!",
+        );
     }
 }
